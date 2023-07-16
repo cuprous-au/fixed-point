@@ -1,7 +1,7 @@
 use crate::{Float, Repr, Spec};
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Copy, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Volt(Repr);
 impl Spec for Volt {
     fn to_repr(self) -> Repr {
@@ -16,7 +16,7 @@ impl Spec for Volt {
     const SYMBOL: &'static str = "V";
 }
 
-#[derive(Clone, Copy, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Amp(Repr);
 impl Spec for Amp {
     fn to_repr(self) -> Repr {
@@ -30,7 +30,7 @@ impl Spec for Amp {
     const SYMBOL: &'static str = "A";
 }
 
-#[derive(Clone, Copy, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Watt(Repr);
 impl Spec for Watt {
     fn to_repr(self) -> Repr {
@@ -44,7 +44,7 @@ impl Spec for Watt {
     const SYMBOL: &'static str = "W";
 }
 
-#[derive(Clone, Copy, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct KiloWatt(Repr);
 impl Spec for KiloWatt {
     fn to_repr(self) -> Repr {
@@ -58,7 +58,7 @@ impl Spec for KiloWatt {
     const SYMBOL: &'static str = "kW";
 }
 
-#[derive(Clone, Copy, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct KiloWattHour(Repr);
 impl Spec for KiloWattHour {
     fn to_repr(self) -> Repr {
@@ -72,7 +72,7 @@ impl Spec for KiloWattHour {
     const SYMBOL: &'static str = "kWh";
 }
 
-#[derive(Clone, Copy, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct CentiOhm(Repr);
 impl Spec for CentiOhm {
     fn to_repr(self) -> Repr {

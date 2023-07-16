@@ -7,6 +7,7 @@ use core::{
 };
 use serde::{Deserialize, Serialize};
 
+pub mod phases;
 pub mod unit;
 
 /// A generic fixed point numeric type implemented as a
@@ -24,7 +25,7 @@ pub mod unit;
 ///
 /// This is all no-std and with no dependencies beyond core.
 ///
-#[derive(Clone, Copy, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct FixedPoint<S>(S);
 
 /// The type of float for scaling and conversion.  
