@@ -25,15 +25,17 @@ pub mod unit;
 /// This is all no-std and with no dependencies beyond core.
 ///
 #[derive(Clone, Copy, Deserialize, Eq, PartialEq, Serialize)]
-pub struct FixedPoint<S: Spec>(S::Repr);
+pub struct FixedPoint<S>(S);
 
 /// The type of float for scaling and conversion.  
 /// This is f32 for support on microcrontrollers.
 type Float = f32;
 
+/// The integer representation of a fixed point number.
+/// This value is scaled to include the fractional part.
+type Repr = i32;
+
 /// The specification of a FixedPoint number.
-/// The type Self::Repr gives the representation
-/// of the fixed point number.
 ///
 /// The constant Self::SCALE indicates the
 /// size of the fractional part.  A value
@@ -43,22 +45,21 @@ type Float = f32;
 /// can be sucessfully derived for every FixedPoint type.
 pub trait Spec
 where
-    Self: Clone + Copy + Eq + PartialEq,
-    Self::Repr: Clone + Copy + Eq + PartialEq,
+    Self: Clone + Copy + Eq + PartialEq + Serialize + for<'a> Deserialize<'a>,
 {
-    type Repr;
     const SCALE: Float;
     const PRECISION: usize;
     const SYMBOL: &'static str;
+    fn to_repr(self) -> Repr;
+    fn from_repr(repr: Repr) -> Self;
 }
 
 impl<S> fmt::Debug for FixedPoint<S>
 where
     S: Spec,
-    S::Repr: fmt::Debug,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}/{} {}", self.0, S::SCALE, S::SYMBOL)
+        write!(f, "{:?}/{} {}", self.0.to_repr(), S::SCALE, S::SYMBOL)
     }
 }
 
@@ -66,57 +67,22 @@ where
 impl<S> defmt::Format for FixedPoint<S>
 where
     S: Spec,
-    S::Repr: defmt::Format,
 {
     fn format(&self, f: defmt::Formatter) {
-        defmt::write!(f, "{}/{} {}", self.0, S::SCALE, S::SYMBOL)
-    }
-}
-
-/// A helper trait to deal with representations.
-/// Implemented for u32 and i32.
-trait ConvertRepr {
-    fn to_float(self) -> Float;
-    fn from_float(value: Float) -> Self;
-    fn parts(self, scale: usize) -> (bool, usize, usize);
-}
-
-impl ConvertRepr for u32 {
-    fn from_float(value: Float) -> Self {
-        value as Self
-    }
-    fn to_float(self) -> Float {
-        self as Float
-    }
-    fn parts(self, scale: usize) -> (bool, usize, usize) {
-        (false, self as usize / scale, self as usize % scale)
-    }
-}
-
-impl ConvertRepr for i32 {
-    fn from_float(value: Float) -> Self {
-        value as Self
-    }
-    fn to_float(self) -> Float {
-        self as Float
-    }
-    fn parts(self, scale: usize) -> (bool, usize, usize) {
-        if self >= 0 {
-            (false, self as usize / scale, self as usize % scale)
-        } else {
-            (true, (-self) as usize / scale, (-self) as usize % scale)
-        }
+        defmt::write!(f, "{}/{} {}", self.0.to_repr(), S::SCALE, S::SYMBOL)
     }
 }
 
 impl<S> fmt::Display for FixedPoint<S>
 where
     S: Spec,
-    S::Repr: ConvertRepr,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let (negative, whole, frac) = S::Repr::parts(self.0.clone(), S::SCALE as usize);
-        let sign = if negative { "-" } else { "" };
+        let repr = self.0.to_repr();
+        let sign = if repr < 0 { "-" } else { "" };
+        let magn = repr.abs();
+        let whole = magn / S::SCALE as Repr;
+        let frac = magn % S::SCALE as Repr;
         if frac > 0 {
             write!(f, "{}{}.{:03$}", sign, whole, frac, S::PRECISION)
         } else {
@@ -130,13 +96,12 @@ pub struct ParseError;
 impl<S> FromStr for FixedPoint<S>
 where
     S: Spec,
-    S::Repr: ConvertRepr,
 {
     type Err = ParseError;
 
     fn from_str(text: &str) -> Result<Self, Self::Err> {
         if let Ok(value) = text.parse::<Float>() {
-            Ok(FixedPoint(S::Repr::from_float(value)))
+            Ok(value.into())
         } else {
             Err(ParseError)
         }
@@ -146,98 +111,88 @@ where
 impl<S> From<Float> for FixedPoint<S>
 where
     S: Spec,
-    S::Repr: ConvertRepr,
 {
     fn from(value: Float) -> Self {
-        Self(S::Repr::from_float(value * S::SCALE))
+        Self(S::from_repr((value * S::SCALE) as Repr))
     }
 }
 
 impl<S> From<FixedPoint<S>> for Float
 where
     S: Spec,
-    S::Repr: ConvertRepr,
 {
     fn from(value: FixedPoint<S>) -> Self {
-        value.0.to_float() * (1.0 / S::SCALE)
+        value.0.to_repr() as Float * (1.0 / S::SCALE)
     }
 }
 
 impl From<FixedPoint<unit::Watt>> for FixedPoint<unit::KiloWatt> {
     fn from(value: FixedPoint<unit::Watt>) -> Self {
-        FixedPoint(<unit::KiloWatt as Spec>::Repr::from_float(
-            <unit::Watt as Spec>::Repr::to_float(value.0) * 0.001,
-        ))
-    }
-}
-
-impl<S> Default for FixedPoint<S>
-where
-    S: Spec,
-    S::Repr: Default,
-{
-    fn default() -> Self {
-        FixedPoint(Default::default())
+        let watts: Float = value.into();
+        (watts * 0.001).into()
     }
 }
 
 impl<S> Add<FixedPoint<S>> for FixedPoint<S>
 where
     S: Spec,
-    S::Repr: Add<S::Repr, Output = S::Repr>,
 {
-    type Output = FixedPoint<S>;
+    type Output = Self;
 
-    fn add(self, rhs: FixedPoint<S>) -> Self::Output {
-        FixedPoint(self.0 + rhs.0)
+    fn add(self, rhs: Self) -> Self {
+        let lhs = self.0.to_repr();
+        let rhs = rhs.0.to_repr();
+        Self(S::from_repr(lhs.saturating_add(rhs)))
     }
 }
 
 impl<S> Sub<FixedPoint<S>> for FixedPoint<S>
 where
     S: Spec,
-    S::Repr: Sub<S::Repr, Output = S::Repr>,
 {
-    type Output = FixedPoint<S>;
+    type Output = Self;
 
-    fn sub(self, rhs: FixedPoint<S>) -> Self::Output {
-        FixedPoint(self.0 - rhs.0)
+    fn sub(self, rhs: Self) -> Self {
+        let lhs = self.0.to_repr();
+        let rhs = rhs.0.to_repr();
+        Self(S::from_repr(lhs.saturating_sub(rhs)))
     }
 }
 
 impl<S> Mul<Float> for FixedPoint<S>
 where
     S: Spec,
-    S::Repr: ConvertRepr,
 {
-    type Output = FixedPoint<S>;
+    type Output = Self;
 
-    fn mul(self, rhs: Float) -> Self::Output {
-        FixedPoint(S::Repr::from_float(S::Repr::to_float(self.0) * rhs))
+    fn mul(self, rhs: Float) -> Self {
+        let lhs: Float = self.into();
+        (lhs * rhs).into()
     }
 }
 
 impl<S> Div<Float> for FixedPoint<S>
 where
     S: Spec,
-    S::Repr: ConvertRepr,
 {
-    type Output = FixedPoint<S>;
+    type Output = Self;
 
-    fn div(self, rhs: Float) -> Self::Output {
-        FixedPoint(S::Repr::from_float(S::Repr::to_float(self.0) / rhs))
+    fn div(self, rhs: Float) -> Self {
+        let lhs: Float = self.into();
+        (lhs / rhs).into()
     }
 }
 
 impl<S> Div<FixedPoint<S>> for FixedPoint<S>
 where
     S: Spec,
-    S::Repr: ConvertRepr,
 {
     type Output = Float;
 
-    fn div(self, rhs: FixedPoint<S>) -> Self::Output {
-        S::Repr::to_float(self.0) / S::Repr::to_float(rhs.0)
+    fn div(self, rhs: Self) -> Self::Output {
+        let lhs: Float = self.into();
+        let rhs: Float = rhs.into();
+        lhs / rhs
     }
 }
 
