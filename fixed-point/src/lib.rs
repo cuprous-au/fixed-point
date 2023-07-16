@@ -9,12 +9,43 @@ use serde::{Deserialize, Serialize};
 
 pub mod unit;
 
+/// A generic fixed point numeric type implemented as a
+/// single valued tuple-struct that serializes cleanly.
+///
+/// A type parameter gives the units, representation,
+/// scaling and presentation.
+///
+/// Traits are defined for:
+/// - Conversions to and from Float (f32).
+/// - Operations add, substract and scaling (ie a linear space).
+/// - Equality.
+/// - Debug, Display and defmt::Format
+/// - Parsing from strings.
+///
+/// This is all no-std and with no dependencies beyond core.
+///
 #[derive(Clone, Copy, Deserialize, Eq, PartialEq, Serialize)]
 pub struct FixedPoint<S: Spec>(S::Repr);
 
+/// The type of float for scaling and conversion.  
+/// This is f32 for support on microcrontrollers.
 type Float = f32;
 
-pub trait Spec {
+/// The specification of a FixedPoint number.
+/// The type Self::Repr gives the representation
+/// of the fixed point number.
+///
+/// The constant Self::SCALE indicates the
+/// size of the fractional part.  A value
+/// is multiplied by SCALE then truncated to Repr.
+///
+/// The trait requirements ensure those same traits
+/// can be sucessfully derived for every FixedPoint type.
+pub trait Spec
+where
+    Self: Clone + Copy + Eq + PartialEq,
+    Self::Repr: Clone + Copy + Eq + PartialEq,
+{
     type Repr;
     const SCALE: Float;
     const PRECISION: usize;
@@ -42,7 +73,9 @@ where
     }
 }
 
-pub trait ConvertRepr {
+/// A helper trait to deal with representations.
+/// Implemented for u32 and i32.
+trait ConvertRepr {
     fn to_float(self) -> Float;
     fn from_float(value: Float) -> Self;
     fn parts(self, scale: usize) -> (bool, usize, usize);
@@ -79,7 +112,7 @@ impl ConvertRepr for i32 {
 impl<S> fmt::Display for FixedPoint<S>
 where
     S: Spec,
-    S::Repr: ConvertRepr + Clone,
+    S::Repr: ConvertRepr,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let (negative, whole, frac) = S::Repr::parts(self.0.clone(), S::SCALE as usize);
