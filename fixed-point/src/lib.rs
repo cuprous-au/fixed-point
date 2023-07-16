@@ -12,8 +12,8 @@ pub mod unit;
 /// A generic fixed point numeric type implemented as a
 /// single valued tuple-struct that serializes cleanly.
 ///
-/// A type parameter gives the units, representation,
-/// scaling and presentation.
+/// A type parameter with trait Spec gives the units,
+/// and scaling.
 ///
 /// Traits are defined for:
 /// - Conversions to and from Float (f32).
