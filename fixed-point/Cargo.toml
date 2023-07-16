@@ -1,0 +1,17 @@
+[package]
+name = "fixed_point"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+defmt = { version = "0.3", optional = true }
+
+[features]
+defmt = ["dep:defmt"]
+default = ["defmt"]
+
+[dev-dependencies]
+serde_json = "1"
