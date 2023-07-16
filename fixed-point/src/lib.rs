@@ -7,6 +7,8 @@ use core::{
 };
 use serde::{Deserialize, Serialize};
 
+pub mod unit;
+
 #[derive(Clone, Copy, Deserialize, Eq, PartialEq, Serialize)]
 pub struct FixedPoint<S: Spec>(S::Repr);
 
@@ -128,6 +130,14 @@ where
     }
 }
 
+impl From<FixedPoint<unit::Watt>> for FixedPoint<unit::KiloWatt> {
+    fn from(value: FixedPoint<unit::Watt>) -> Self {
+        FixedPoint(<unit::KiloWatt as Spec>::Repr::from_float(
+            <unit::Watt as Spec>::Repr::to_float(value.0) * 0.001,
+        ))
+    }
+}
+
 impl<S> Default for FixedPoint<S>
 where
     S: Spec,
@@ -198,73 +208,11 @@ where
     }
 }
 
-#[derive(Clone, Copy, Eq, PartialEq)]
-pub struct Volt;
-impl Spec for Volt {
-    type Repr = u32;
-    const SCALE: Float = 10.0;
-    const PRECISION: usize = 1;
-    const SYMBOL: &'static str = "V";
-}
-
-#[derive(Clone, Copy, Eq, PartialEq)]
-pub struct Amp;
-impl Spec for Amp {
-    type Repr = i32;
-    const SCALE: Float = 10.0;
-    const PRECISION: usize = 1;
-    const SYMBOL: &'static str = "A";
-}
-
-#[derive(Clone, Copy, Eq, PartialEq)]
-pub struct Watt;
-impl Spec for Watt {
-    type Repr = i32;
-    const SCALE: Float = 100.0;
-    const PRECISION: usize = 2;
-    const SYMBOL: &'static str = "W";
-}
-
-#[derive(Clone, Copy, Eq, PartialEq)]
-pub struct KiloWatt;
-impl Spec for KiloWatt {
-    type Repr = i32;
-    const SCALE: Float = 10.0;
-    const PRECISION: usize = 1;
-    const SYMBOL: &'static str = "W";
-}
-
-impl From<FixedPoint<Watt>> for FixedPoint<KiloWatt> {
-    fn from(value: FixedPoint<Watt>) -> Self {
-        FixedPoint(<KiloWatt as Spec>::Repr::from_float(
-            <Watt as Spec>::Repr::to_float(value.0) * 0.001,
-        ))
-    }
-}
-
-#[derive(Clone, Copy, Eq, PartialEq)]
-pub struct KiloWattHour;
-impl Spec for KiloWattHour {
-    type Repr = u32;
-    const SCALE: Float = 100.0;
-    const PRECISION: usize = 2;
-    const SYMBOL: &'static str = "kWh";
-}
-
-#[derive(Clone, Copy, Eq, PartialEq)]
-pub struct CentiOhm;
-impl Spec for CentiOhm {
-    type Repr = u32;
-    const SCALE: Float = 1000.0;
-    const PRECISION: usize = 3;
-    const SYMBOL: &'static str = "cR";
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    type Example = FixedPoint<Watt>;
+    type Example = FixedPoint<unit::Watt>;
 
     #[test]
     fn it_works() {
