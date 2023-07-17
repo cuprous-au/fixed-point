@@ -205,14 +205,30 @@ mod tests {
     type Example = FixedPoint<unit::Watt>;
 
     #[test]
-    fn it_works() {
-        fn json(e: Example) {
-            println!("{}", serde_json::to_string_pretty(&e).unwrap());
-        }
+    fn cloning_and_equality() {
         let e1: Example = 5.01f32.into();
         let e2 = e1.clone();
-        json(e2);
-        println!("{e1:?} and {e2}");
-        assert_eq!(e1, e2)
+        assert_eq!(e1, e2);
+    }
+
+    #[test]
+    fn ordering() {
+        let e1: Example = 5.01f32.into();
+        let e2: Example = 5.11f32.into();
+        assert!(e2 > e1);
+    }
+
+    #[test]
+    fn serialization() {
+        let e1: Example = 5.01f32.into();
+        assert_eq!(serde_json::to_string(&e1).unwrap(), "501");
+    }
+
+    #[test]
+    fn display() {
+        let e1: Example = 5.01f32.into();
+        assert_eq!(format!("{}", e1), "5.01");
+        assert_eq!(format!("{:?}", e1), "501/100 W");
+        assert_eq!(format!("{}", Example::default() - e1), "-5.01");
     }
 }
