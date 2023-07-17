@@ -17,22 +17,19 @@ impl<T> PhasesOpt<T> {
 
 impl<T> PhasesOpt<T>
 where
-    T: Add<T, Output = T> + Copy,
+    T: Add<T, Output = T>,
 {
-    pub fn sum(&self) -> Option<T> {
+    pub fn sum(self) -> Option<T> {
         add_opt(self.0, add_opt(self.1, self.2))
     }
 }
 
-fn add_opt<T>(lhs: Option<T>, rhs: Option<T>) -> Option<T>
+impl<T> PhasesOpt<T>
 where
-    T: Add<T, Output = T>,
+    T: Ord,
 {
-    match (lhs, rhs) {
-        (Some(a), Some(b)) => Some(a + b),
-        (Some(a), None) => Some(a),
-        (None, Some(b)) => Some(b),
-        (None, None) => None,
+    pub fn max(self) -> Option<T> {
+        max_opt(self.0, max_opt(self.1, self.2))
     }
 }
 
@@ -48,5 +45,29 @@ where
             add_opt(self.1, rhs.1),
             add_opt(self.2, rhs.2),
         )
+    }
+}
+
+fn add_opt<T>(lhs: Option<T>, rhs: Option<T>) -> Option<T>
+where
+    T: Add<T, Output = T>,
+{
+    match (lhs, rhs) {
+        (Some(a), Some(b)) => Some(a + b),
+        (Some(a), None) => Some(a),
+        (None, Some(b)) => Some(b),
+        (None, None) => None,
+    }
+}
+
+fn max_opt<T>(lhs: Option<T>, rhs: Option<T>) -> Option<T>
+where
+    T: Ord,
+{
+    match (lhs, rhs) {
+        (Some(a), Some(b)) => Some(a.max(b)),
+        (Some(a), None) => Some(a),
+        (None, Some(b)) => Some(b),
+        (None, None) => None,
     }
 }
