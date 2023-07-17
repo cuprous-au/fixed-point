@@ -10,22 +10,23 @@ use serde::{Deserialize, Serialize};
 pub mod phases;
 pub mod unit;
 
-/// A generic fixed point numeric type implemented as a
-/// single valued tuple-struct that serializes cleanly.
+/// A generic fixed point numeric type implemented as a tuple-struct that serializes cleanly.
+/// Type parameter `S` effectively represents the units of the number, e.g. `FixedPoint<Volt>`
+/// is a fixed point number representing a voltage.  
 ///
-/// A type parameter with trait Spec gives the units,
-/// and scaling.
+/// A trait `Spec` implemented for `S` gives the scaling and precision of the fixed point representation.
+/// Several types implementing Spec are provided in module `unit`.  
 ///
-/// Traits are defined for:
+/// Traits are implemented for:
+///
 /// - Conversions to and from Float (f32).
 /// - Operations add, substract and scaling (ie a linear space).
-/// - Equality.
-/// - Debug, Display and defmt::Format
+/// - Equality and ordering.
+/// - Debug, Display and defmt::Format.
 /// - Parsing from strings.
+/// - Serde.
 ///
-/// This is all no-std and with no dependencies beyond core.
-///
-#[derive(Clone, Copy, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Default, Deserialize, Eq, PartialEq, Serialize, Ord, PartialOrd)]
 pub struct FixedPoint<S>(S);
 
 /// The type of float for scaling and conversion.  
