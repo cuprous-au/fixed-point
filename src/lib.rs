@@ -200,13 +200,6 @@ where
     }
 }
 
-impl From<FixedPoint<unit::Watt>> for FixedPoint<unit::KiloWatt> {
-    fn from(value: FixedPoint<unit::Watt>) -> Self {
-        let watts: Float = value.into();
-        (watts * 0.001).into()
-    }
-}
-
 impl<R> Add<FixedPoint<R>> for FixedPoint<R>
 where
     R: Spec,
@@ -267,6 +260,21 @@ where
         let lhs: Float = self.into();
         let rhs: Float = rhs.into();
         lhs / rhs
+    }
+}
+
+// special case energy conversion
+impl From<FixedPoint<unit::Watt>> for FixedPoint<unit::KiloWatt> {
+    fn from(value: FixedPoint<unit::Watt>) -> Self {
+        let watts: Float = value.into();
+        (watts * 0.001).into()
+    }
+}
+
+impl FixedPoint<unit::Watt> {
+    /// Convenience function helps handle and display larger energy values
+    pub fn kwh(self) -> FixedPoint<unit::KiloWatt> {
+        self.into()
     }
 }
 
@@ -375,22 +383,10 @@ mod tests {
         assert_eq!(Power::new2(325).to_string(), "3.25");
         assert_eq!(Power::new2(320).to_string(), "3.2");
         assert_eq!(Power::new2(300).to_string(), "3");
-        assert_eq!(
-            FixedPoint::<unit::KiloWatt>::from(Power::new2(310020)).to_string(),
-            "3.1"
-        );
-        assert_eq!(
-            FixedPoint::<unit::KiloWatt>::from(Power::new2(1)).to_string(),
-            "0"
-        );
-        assert_eq!(
-            FixedPoint::<unit::KiloWatt>::from(Power::new2(11400)).to_string(),
-            "0.1"
-        );
-        assert_eq!(
-            FixedPoint::<unit::KiloWatt>::from(Power::new2(1400)).to_string(),
-            "0"
-        );
+        assert_eq!(Power::new2(310020).kwh().to_string(), "3.1");
+        assert_eq!(Power::new2(1).kwh().to_string(), "0");
+        assert_eq!(Power::new2(11400).kwh().to_string(), "0.1");
+        assert_eq!(Power::new2(1400).kwh().to_string(), "0");
     }
 
     #[test]
@@ -399,22 +395,10 @@ mod tests {
         assert_eq!(Power::new2(-305).to_string(), "-3.05");
         assert_eq!(Power::new2(-325).to_string(), "-3.25");
         assert_eq!(Power::new2(-300).to_string(), "-3");
-        assert_eq!(
-            FixedPoint::<unit::KiloWatt>::from(Power::new2(-310020)).to_string(),
-            "-3.1"
-        );
-        assert_eq!(
-            FixedPoint::<unit::KiloWatt>::from(Power::new2(-1)).to_string(),
-            "0"
-        );
-        assert_eq!(
-            FixedPoint::<unit::KiloWatt>::from(Power::new2(-11400)).to_string(),
-            "-0.1"
-        );
-        assert_eq!(
-            FixedPoint::<unit::KiloWatt>::from(Power::new2(-1400)).to_string(),
-            "0"
-        );
+        assert_eq!(Power::new2(-310020).kwh().to_string(), "-3.1");
+        assert_eq!(Power::new2(-1).kwh().to_string(), "0");
+        assert_eq!(Power::new2(-11400).kwh().to_string(), "-0.1");
+        assert_eq!(Power::new2(-1400).kwh().to_string(), "0");
     }
 
     #[test]
