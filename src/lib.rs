@@ -11,15 +11,15 @@ pub mod phases;
 pub mod unit;
 
 /// A generic fixed point numeric type implemented as a tuple-struct that serializes cleanly.
-/// Type parameter `S` is the representation of the number on the wire and in memory.  
+/// Type parameter `R` is the representation of the number on the wire and in memory.  
 ///
-/// A trait `Spec` implemented for `S` gives the scaling and precision of the number.
+/// A trait `Spec` implemented for `R` gives the scaling and precision of the number.
 /// Several types implementing Spec are provided in module `unit`.  
 ///
 /// For example, `Volt` defines an i32 representation of voltage.  `impl Spec for Volt`
 /// gives the precision of this representation as one decimal place.
 ///
-/// The traits defined on FixedPoint<S> provide all representations with:
+/// The traits defined on FixedPoint<R> provide all representations with:
 ///
 /// - Conversions to and from Float (f32).
 /// - Operations add, substract and scaling (ie a linear space).
@@ -29,7 +29,7 @@ pub mod unit;
 /// - Serde.
 ///
 #[derive(Clone, Copy, Default, Deserialize, Eq, PartialEq, Serialize, Ord, PartialOrd)]
-pub struct FixedPoint<S>(S);
+pub struct FixedPoint<R>(R);
 
 /// The type of float for scaling and conversion.  
 /// This is f32 for support on microcontrollers.
@@ -60,37 +60,37 @@ where
     fn from_fixed(repr: Fixed) -> Self;
 }
 
-impl<S> fmt::Debug for FixedPoint<S>
+impl<R> fmt::Debug for FixedPoint<R>
 where
-    S: Spec,
+    R: Spec,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}/{} {}", self.0.to_fixed(), S::SCALE, S::SYMBOL)
+        write!(f, "{:?}/{} {}", self.0.to_fixed(), R::SCALE, R::SYMBOL)
     }
 }
 
 #[cfg(feature = "defmt")]
-impl<S> defmt::Format for FixedPoint<S>
+impl<R> defmt::Format for FixedPoint<R>
 where
-    S: Spec,
+    R: Spec,
 {
     fn format(&self, f: defmt::Formatter) {
-        defmt::write!(f, "{}/{} {}", self.0.to_fixed(), S::SCALE, S::SYMBOL)
+        defmt::write!(f, "{}/{} {}", self.0.to_fixed(), R::SCALE, R::SYMBOL)
     }
 }
 
-impl<S> fmt::Display for FixedPoint<S>
+impl<R> fmt::Display for FixedPoint<R>
 where
-    S: Spec,
+    R: Spec,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let repr = self.0.to_fixed();
         let sign = if repr < 0 { "-" } else { "" };
         let magn = repr.abs();
-        let whole = magn / S::SCALE as Fixed;
-        let frac = magn % S::SCALE as Fixed;
+        let whole = magn / R::SCALE as Fixed;
+        let frac = magn % R::SCALE as Fixed;
         if frac > 0 {
-            write!(f, "{}{}.{:03$}", sign, whole, frac, S::PRECISION)
+            write!(f, "{}{}.{:03$}", sign, whole, frac, R::PRECISION)
         } else {
             write!(f, "{}{}", sign, whole)
         }
@@ -99,9 +99,9 @@ where
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ParseError;
-impl<S> FromStr for FixedPoint<S>
+impl<R> FromStr for FixedPoint<R>
 where
-    S: Spec,
+    R: Spec,
 {
     type Err = ParseError;
 
@@ -114,21 +114,21 @@ where
     }
 }
 
-impl<S> From<Float> for FixedPoint<S>
+impl<R> From<Float> for FixedPoint<R>
 where
-    S: Spec,
+    R: Spec,
 {
     fn from(value: Float) -> Self {
-        Self(S::from_fixed((value * S::SCALE) as Fixed))
+        Self(R::from_fixed((value * R::SCALE) as Fixed))
     }
 }
 
-impl<S> From<FixedPoint<S>> for Float
+impl<R> From<FixedPoint<R>> for Float
 where
-    S: Spec,
+    R: Spec,
 {
-    fn from(value: FixedPoint<S>) -> Self {
-        value.0.to_fixed() as Float * (1.0 / S::SCALE)
+    fn from(value: FixedPoint<R>) -> Self {
+        value.0.to_fixed() as Float * (1.0 / R::SCALE)
     }
 }
 
@@ -139,35 +139,35 @@ impl From<FixedPoint<unit::Watt>> for FixedPoint<unit::KiloWatt> {
     }
 }
 
-impl<S> Add<FixedPoint<S>> for FixedPoint<S>
+impl<R> Add<FixedPoint<R>> for FixedPoint<R>
 where
-    S: Spec,
+    R: Spec,
 {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self {
         let lhs = self.0.to_fixed();
         let rhs = rhs.0.to_fixed();
-        Self(S::from_fixed(lhs.saturating_add(rhs)))
+        Self(R::from_fixed(lhs.saturating_add(rhs)))
     }
 }
 
-impl<S> Sub<FixedPoint<S>> for FixedPoint<S>
+impl<R> Sub<FixedPoint<R>> for FixedPoint<R>
 where
-    S: Spec,
+    R: Spec,
 {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self {
         let lhs = self.0.to_fixed();
         let rhs = rhs.0.to_fixed();
-        Self(S::from_fixed(lhs.saturating_sub(rhs)))
+        Self(R::from_fixed(lhs.saturating_sub(rhs)))
     }
 }
 
-impl<S> Mul<Float> for FixedPoint<S>
+impl<R> Mul<Float> for FixedPoint<R>
 where
-    S: Spec,
+    R: Spec,
 {
     type Output = Self;
 
@@ -177,9 +177,9 @@ where
     }
 }
 
-impl<S> Div<Float> for FixedPoint<S>
+impl<R> Div<Float> for FixedPoint<R>
 where
-    S: Spec,
+    R: Spec,
 {
     type Output = Self;
 
@@ -189,9 +189,9 @@ where
     }
 }
 
-impl<S> Div<FixedPoint<S>> for FixedPoint<S>
+impl<R> Div<FixedPoint<R>> for FixedPoint<R>
 where
-    S: Spec,
+    R: Spec,
 {
     type Output = Float;
 
