@@ -102,6 +102,36 @@ where
             (value as Float * 0.001).into()
         }
     }
+
+    /// Extract an integer at 10X scale
+    /// Specialised to a zero cost operation for SCALE=10.0
+    pub fn fix1(self) -> Fixed {
+        if R::SCALE == 10.0 {
+            self.0.to_fixed()
+        } else {
+            (self.to_float() * 10.0) as Fixed
+        }
+    }
+
+    /// Extract an integer at 100X scale
+    /// Specialised to a zero cost operation for SCALE=100.0
+    pub fn fix2(self) -> Fixed {
+        if R::SCALE == 100.0 {
+            self.0.to_fixed()
+        } else {
+            (self.to_float() * 100.0) as Fixed
+        }
+    }
+
+    /// Extract an integer at 1000X scale
+    /// Specialised to a zero cost operation for SCALE=1000.0
+    pub fn fix3(self) -> Fixed {
+        if R::SCALE == 1000.0 {
+            self.0.to_fixed()
+        } else {
+            (self.to_float() * 1000.0) as Fixed
+        }
+    }
 }
 
 impl<R> fmt::Debug for FixedPoint<R>
