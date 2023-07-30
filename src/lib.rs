@@ -57,7 +57,62 @@ where
     const PRECISION: usize;
     const SYMBOL: &'static str;
     fn to_fixed(self) -> Fixed;
-    fn from_fixed(repr: Fixed) -> Self;
+    fn from_fixed(fixed: Fixed) -> Self;
+}
+
+impl<R> FixedPoint<R>
+where
+    R: Spec,
+{
+    /// Construct from a float
+    pub fn new(value: Float) -> Self {
+        value.into()
+    }
+
+    /// Conversion to a float.
+    pub fn to_float(self) -> Float {
+        self.into()
+    }
+
+    /// Construct from a whole number, no fractional part.
+    /// Specialised to a zero cost operation for SCALE=1.0
+    pub fn new0(value: Fixed) -> Self {
+        if R::SCALE == 1.0 {
+            Self(R::from_fixed(value))
+        } else {
+            (value as Float).into()
+        }
+    }
+
+    /// Construct from a integer interpreted at 10x scale.
+    /// Specialised to a zero cost operation for SCALE=10.0
+    pub fn new1(value: Fixed) -> Self {
+        if R::SCALE == 10.0 {
+            Self(R::from_fixed(value))
+        } else {
+            (value as Float * 0.1).into()
+        }
+    }
+
+    /// Construct from a integer interpreted at 100x scale.
+    /// Specialised to a zero cost operation for SCALE=100.0
+    pub fn new2(value: Fixed) -> Self {
+        if R::SCALE == 100.0 {
+            Self(R::from_fixed(value))
+        } else {
+            (value as Float * 0.01).into()
+        }
+    }
+
+    /// Construct from a integer interpreted at 1000x scale.
+    /// Specialised to a zero cost operation for SCALE=1000.0
+    pub fn new3(value: Fixed) -> Self {
+        if R::SCALE == 1000.0 {
+            Self(R::from_fixed(value))
+        } else {
+            (value as Float * 0.001).into()
+        }
+    }
 }
 
 impl<R> fmt::Debug for FixedPoint<R>
