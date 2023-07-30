@@ -17,6 +17,21 @@ impl Spec for Volt {
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Serialize, Deserialize, Ord, PartialOrd)]
+pub struct PreciseVolt(Fixed);
+impl Spec for PreciseVolt {
+    fn to_fixed(self) -> Fixed {
+        self.0
+    }
+    fn from_fixed(fixed: Fixed) -> Self {
+        Self(fixed)
+    }
+
+    const SCALE: Float = 1000.0;
+    const PRECISION: usize = 3;
+    const SYMBOL: &'static str = "V";
+}
+
+#[derive(Clone, Copy, Default, Eq, PartialEq, Serialize, Deserialize, Ord, PartialOrd)]
 pub struct Amp(Fixed);
 impl Spec for Amp {
     fn to_fixed(self) -> Fixed {
@@ -70,18 +85,4 @@ impl Spec for KiloWattHour {
     const SCALE: Float = 100.0;
     const PRECISION: usize = 2;
     const SYMBOL: &'static str = "kWh";
-}
-
-#[derive(Clone, Copy, Default, Eq, PartialEq, Serialize, Deserialize, Ord, PartialOrd)]
-pub struct CentiOhm(Fixed);
-impl Spec for CentiOhm {
-    fn to_fixed(self) -> Fixed {
-        self.0
-    }
-    fn from_fixed(repr: Fixed) -> Self {
-        Self(repr)
-    }
-    const SCALE: Float = 1000.0;
-    const PRECISION: usize = 3;
-    const SYMBOL: &'static str = "cΩ";
 }
