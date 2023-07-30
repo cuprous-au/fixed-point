@@ -12,7 +12,6 @@ impl Spec for Volt {
     }
 
     const SCALE: Float = 10.0;
-    const PRECISION: usize = 1;
     const SYMBOL: &'static str = "V";
 }
 
@@ -27,7 +26,6 @@ impl Spec for PreciseVolt {
     }
 
     const SCALE: Float = 1000.0;
-    const PRECISION: usize = 3;
     const SYMBOL: &'static str = "V";
 }
 
@@ -41,7 +39,6 @@ impl Spec for Amp {
         Self(fixed)
     }
     const SCALE: Float = 10.0;
-    const PRECISION: usize = 1;
     const SYMBOL: &'static str = "A";
 }
 
@@ -55,7 +52,6 @@ impl Spec for Watt {
         Self(fixed)
     }
     const SCALE: Float = 100.0;
-    const PRECISION: usize = 2;
     const SYMBOL: &'static str = "W";
 }
 
@@ -69,7 +65,6 @@ impl Spec for KiloWatt {
         Self(fixed)
     }
     const SCALE: Float = 10.0;
-    const PRECISION: usize = 1;
     const SYMBOL: &'static str = "kW";
 }
 
@@ -83,6 +78,5 @@ impl Spec for KiloWattHour {
         Self(fixed)
     }
     const SCALE: Float = 100.0;
-    const PRECISION: usize = 2;
     const SYMBOL: &'static str = "kWh";
 }

@@ -54,7 +54,6 @@ where
     Self: Clone + Copy + Eq + PartialEq + Serialize + for<'a> Deserialize<'a>,
 {
     const SCALE: Float;
-    const PRECISION: usize;
     const SYMBOL: &'static str;
     fn to_fixed(self) -> Fixed;
     fn from_fixed(fixed: Fixed) -> Self;
@@ -129,15 +128,38 @@ where
     R: Spec,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let fixed = self.0.to_fixed();
-        let sign = if fixed < 0 { "-" } else { "" };
-        let magn = fixed.abs();
-        let whole = magn / R::SCALE as Fixed;
-        let frac = magn % R::SCALE as Fixed;
-        if frac > 0 {
-            write!(f, "{}{}.{:03$}", sign, whole, frac, R::PRECISION)
+        // special treat ment for these decimal point scales
+        if R::SCALE == 10.0 || R::SCALE == 100.0 || R::SCALE == 1000.0 {
+            let fixed = self.0.to_fixed();
+            let sign = if fixed < 0 { "-" } else { "" };
+            let magn = fixed.abs();
+            let whole = magn / R::SCALE as Fixed;
+            let frac = magn % R::SCALE as Fixed;
+
+            if frac > 0 {
+                if R::SCALE == 10.0 {
+                    write!(f, "{sign}{whole}.{frac}")
+                } else if R::SCALE == 100.0 {
+                    if frac % 10 == 0 {
+                        write!(f, "{sign}{whole}.{}", frac / 10)
+                    } else {
+                        write!(f, "{sign}{whole}.{:02}", frac)
+                    }
+                } else {
+                    if frac % 100 == 0 {
+                        write!(f, "{sign}{whole}.{}", frac / 100)
+                    } else if frac % 10 == 0 {
+                        write!(f, "{sign}{whole}.{:02}", frac / 10)
+                    } else {
+                        write!(f, "{sign}{whole}.{:03}", frac)
+                    }
+                }
+            } else {
+                write!(f, "{sign}{whole}")
+            }
         } else {
-            write!(f, "{}{}", sign, whole)
+            // Every other scale including non decimal
+            write!(f, "{}", self.to_float())
         }
     }
 }
