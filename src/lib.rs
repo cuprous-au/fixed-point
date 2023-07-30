@@ -262,33 +262,154 @@ where
 mod tests {
     use super::*;
 
-    type Example = FixedPoint<unit::Watt>;
+    type Voltage = FixedPoint<unit::Volt>;
+    type Current = FixedPoint<unit::Amp>;
+    type Energy = FixedPoint<unit::KiloWattHour>;
+    type Power = FixedPoint<unit::Watt>;
+    type LowVoltage = FixedPoint<unit::PreciseVolt>;
 
     #[test]
     fn cloning_and_equality() {
-        let e1: Example = 5.01f32.into();
+        let e1: Power = 5.01f32.into();
         let e2 = e1.clone();
         assert_eq!(e1, e2);
     }
 
     #[test]
     fn ordering() {
-        let e1: Example = 5.01f32.into();
-        let e2: Example = 5.11f32.into();
+        let e1: Power = 5.01f32.into();
+        let e2: Power = 5.11f32.into();
         assert!(e2 > e1);
     }
 
     #[test]
     fn serialization() {
-        let e1: Example = 5.01f32.into();
+        let e1: Power = 5.01f32.into();
         assert_eq!(serde_json::to_string(&e1).unwrap(), "501");
     }
 
     #[test]
+    fn construction() {
+        assert_eq!(LowVoltage::new(1.705).to_float(), 1.705);
+        assert_eq!(LowVoltage::new0(1705).to_float(), 1705.0001);
+        assert_eq!(LowVoltage::new1(1705).to_float(), 170.50002);
+        assert_eq!(LowVoltage::new2(1705).to_float(), 17.050001);
+        assert_eq!(LowVoltage::new3(1705).to_float(), 1.705);
+    }
+
+    #[test]
     fn display() {
-        let e1: Example = 5.01f32.into();
+        let e1: Power = 5.01f32.into();
         assert_eq!(format!("{}", e1), "5.01");
         assert_eq!(format!("{:?}", e1), "501/100 W");
-        assert_eq!(format!("{}", Example::default() - e1), "-5.01");
+        assert_eq!(format!("{}", Power::default() - e1), "-5.01");
+    }
+
+    #[test]
+    fn test_display_voltage() {
+        assert_eq!(Voltage::new1(2456).to_string(), "245.6");
+        assert_eq!(Voltage::new1(325).to_string(), "32.5");
+        assert_eq!(Voltage::new1(320).to_string(), "32");
+        assert_eq!(Voltage::new1(0).to_string(), "0");
+        assert_eq!(Voltage::new1(1).to_string(), "0.1");
+        assert_eq!(Voltage::new1(10).to_string(), "1");
+    }
+
+    #[test]
+    fn test_display_current() {
+        assert_eq!(Current::new1(325).to_string(), "32.5");
+        assert_eq!(Current::new1(320).to_string(), "32");
+        assert_eq!(Current::new1(0).to_string(), "0");
+        assert_eq!(Current::new1(1).to_string(), "0.1");
+        assert_eq!(Current::new1(10).to_string(), "1");
+
+        assert_eq!(Current::new1(-325).to_string(), "-32.5");
+        assert_eq!(Current::new1(-320).to_string(), "-32");
+        assert_eq!(Current::new1(0).to_string(), "0");
+        assert_eq!(Current::new1(-1).to_string(), "-0.1");
+        assert_eq!(Current::new1(-10).to_string(), "-1");
+    }
+
+    #[test]
+    fn test_parse_current() {
+        assert_eq!("32.5".parse(), Ok(Current::new1(325)));
+        assert_eq!("32".parse(), Ok(Current::new1(320)));
+        assert_eq!("32.54".parse(), Ok(Current::new1(325)));
+        assert_eq!("0.5".parse(), Ok(Current::new1(5)));
+        assert_eq!("".parse::<Current>(), Err(ParseError));
+        assert_eq!(".1".parse::<Current>(), Ok(Current::new1(1)));
+        assert_eq!("1.".parse::<Current>(), Ok(Current::new1(10)));
+
+        assert_eq!("-32.5".parse(), Ok(Current::new1(-325)));
+        assert_eq!("-32.54".parse(), Ok(Current::new1(-325)));
+        assert_eq!("-32".parse(), Ok(Current::new1(-320)));
+        assert_eq!("-0.5".parse(), Ok(Current::new1(-5)));
+        assert_eq!("0.".parse(), Ok(Current::new1(0)));
+    }
+
+    #[test]
+    fn test_display_energy() {
+        assert_eq!(Energy::new2(305).to_string(), "3.05");
+        assert_eq!(Energy::new2(310).to_string(), "3.1");
+        assert_eq!(Energy::new2(325).to_string(), "3.25");
+        assert_eq!(Energy::new2(300).to_string(), "3");
+    }
+
+    #[test]
+    fn test_display_power() {
+        assert_eq!(Power::new2(5).to_string(), "0.05");
+        assert_eq!(Power::new2(305).to_string(), "3.05");
+        assert_eq!(Power::new2(325).to_string(), "3.25");
+        assert_eq!(Power::new2(320).to_string(), "3.2");
+        assert_eq!(Power::new2(300).to_string(), "3");
+        assert_eq!(
+            FixedPoint::<unit::KiloWatt>::from(Power::new2(310020)).to_string(),
+            "3.1"
+        );
+        assert_eq!(
+            FixedPoint::<unit::KiloWatt>::from(Power::new2(1)).to_string(),
+            "0"
+        );
+        assert_eq!(
+            FixedPoint::<unit::KiloWatt>::from(Power::new2(11400)).to_string(),
+            "0.1"
+        );
+        assert_eq!(
+            FixedPoint::<unit::KiloWatt>::from(Power::new2(1400)).to_string(),
+            "0"
+        );
+    }
+
+    #[test]
+    fn test_display_negative_power() {
+        assert_eq!(Power::new2(-5).to_string(), "-0.05");
+        assert_eq!(Power::new2(-305).to_string(), "-3.05");
+        assert_eq!(Power::new2(-325).to_string(), "-3.25");
+        assert_eq!(Power::new0(-3).to_string(), "-3");
+        assert_eq!(
+            FixedPoint::<unit::KiloWatt>::from(Power::new2(-310020)).to_string(),
+            "-3.1"
+        );
+        assert_eq!(
+            FixedPoint::<unit::KiloWatt>::from(Power::new2(-1)).to_string(),
+            "0"
+        );
+        assert_eq!(
+            FixedPoint::<unit::KiloWatt>::from(Power::new2(-11400)).to_string(),
+            "-0.1"
+        );
+        assert_eq!(
+            FixedPoint::<unit::KiloWatt>::from(Power::new2(-1400)).to_string(),
+            "0"
+        );
+    }
+
+    #[test]
+    fn test_display_low_voltage() {
+        assert_eq!(LowVoltage::new3(305).to_string(), "0.305");
+        assert_eq!(LowVoltage::new3(310).to_string(), "0.31");
+        assert_eq!(LowVoltage::new3(325).to_string(), "0.325");
+        assert_eq!(LowVoltage::new3(300).to_string(), "0.3");
+        assert_eq!(LowVoltage::new3(1020).to_string(), "1.02");
     }
 }
