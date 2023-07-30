@@ -139,9 +139,9 @@ where
     R: Spec,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let repr = self.0.to_fixed();
-        let sign = if repr < 0 { "-" } else { "" };
-        let magn = repr.abs();
+        let fixed = self.0.to_fixed();
+        let sign = if fixed < 0 { "-" } else { "" };
+        let magn = fixed.abs();
         let whole = magn / R::SCALE as Fixed;
         let frac = magn % R::SCALE as Fixed;
         if frac > 0 {
@@ -154,6 +154,7 @@ where
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ParseError;
+
 impl<R> FromStr for FixedPoint<R>
 where
     R: Spec,

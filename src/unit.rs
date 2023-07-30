@@ -7,8 +7,8 @@ impl Spec for Volt {
     fn to_fixed(self) -> Fixed {
         self.0
     }
-    fn from_fixed(repr: Fixed) -> Self {
-        Self(repr)
+    fn from_fixed(fixed: Fixed) -> Self {
+        Self(fixed)
     }
 
     const SCALE: Float = 10.0;
@@ -22,8 +22,8 @@ impl Spec for Amp {
     fn to_fixed(self) -> Fixed {
         self.0
     }
-    fn from_fixed(repr: Fixed) -> Self {
-        Self(repr)
+    fn from_fixed(fixed: Fixed) -> Self {
+        Self(fixed)
     }
     const SCALE: Float = 10.0;
     const PRECISION: usize = 1;
@@ -36,8 +36,8 @@ impl Spec for Watt {
     fn to_fixed(self) -> Fixed {
         self.0
     }
-    fn from_fixed(repr: Fixed) -> Self {
-        Self(repr)
+    fn from_fixed(fixed: Fixed) -> Self {
+        Self(fixed)
     }
     const SCALE: Float = 100.0;
     const PRECISION: usize = 2;
@@ -50,8 +50,8 @@ impl Spec for KiloWatt {
     fn to_fixed(self) -> Fixed {
         self.0
     }
-    fn from_fixed(repr: Fixed) -> Self {
-        Self(repr)
+    fn from_fixed(fixed: Fixed) -> Self {
+        Self(fixed)
     }
     const SCALE: Float = 10.0;
     const PRECISION: usize = 1;
@@ -64,8 +64,8 @@ impl Spec for KiloWattHour {
     fn to_fixed(self) -> Fixed {
         self.0
     }
-    fn from_fixed(repr: Fixed) -> Self {
-        Self(repr)
+    fn from_fixed(fixed: Fixed) -> Self {
+        Self(fixed)
     }
     const SCALE: Float = 100.0;
     const PRECISION: usize = 2;
