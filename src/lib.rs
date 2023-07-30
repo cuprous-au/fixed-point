@@ -74,16 +74,6 @@ where
         self.into()
     }
 
-    /// Construct from a whole number, no fractional part.
-    /// Specialised to a zero cost operation for SCALE=1.0
-    pub fn new0(value: Fixed) -> Self {
-        if R::SCALE == 1.0 {
-            Self(R::from_fixed(value))
-        } else {
-            (value as Float).into()
-        }
-    }
-
     /// Construct from a integer interpreted at 10x scale.
     /// Specialised to a zero cost operation for SCALE=10.0
     pub fn new1(value: Fixed) -> Self {
@@ -290,8 +280,9 @@ mod tests {
 
     #[test]
     fn construction() {
+        // println!("Exact repr of new(1.705) is {:?}", LowVoltage::new(1.705));
         assert_eq!(LowVoltage::new(1.705).to_float(), 1.705);
-        assert_eq!(LowVoltage::new0(1705).to_float(), 1705.0001);
+        // println!("Exact repr of new1(1705) is {:?}", LowVoltage::new1(1705));
         assert_eq!(LowVoltage::new1(1705).to_float(), 170.50002);
         assert_eq!(LowVoltage::new2(1705).to_float(), 17.050001);
         assert_eq!(LowVoltage::new3(1705).to_float(), 1.705);
@@ -385,7 +376,7 @@ mod tests {
         assert_eq!(Power::new2(-5).to_string(), "-0.05");
         assert_eq!(Power::new2(-305).to_string(), "-3.05");
         assert_eq!(Power::new2(-325).to_string(), "-3.25");
-        assert_eq!(Power::new0(-3).to_string(), "-3");
+        assert_eq!(Power::new2(-300).to_string(), "-3");
         assert_eq!(
             FixedPoint::<unit::KiloWatt>::from(Power::new2(-310020)).to_string(),
             "-3.1"
