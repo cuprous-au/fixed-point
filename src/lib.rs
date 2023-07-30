@@ -19,7 +19,7 @@ pub mod unit;
 /// For example, `Volt` defines an i32 representation of voltage.  `impl Spec for Volt`
 /// gives the precision of this representation as one decimal place.
 ///
-/// Additional traits are implemented for:
+/// The traits defined on FixedPoint<S> provide all representations with:
 ///
 /// - Conversions to and from Float (f32).
 /// - Operations add, substract and scaling (ie a linear space).
@@ -45,7 +45,7 @@ type Fixed = i32;
 ///
 /// The constant Self::SCALE indicates the
 /// size of the fractional part.  A value
-/// is multiplied by SCALE then truncated to Repr.
+/// is multiplied by SCALE then truncated to Fixed.
 ///
 /// The trait requirements ensure those same traits
 /// can be sucessfully derived for every FixedPoint type.
