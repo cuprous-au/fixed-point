@@ -41,7 +41,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "fixed_point"
+name = "fixed-point"
 version = "0.1.0"
 dependencies = [
  "defmt",
