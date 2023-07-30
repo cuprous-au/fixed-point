@@ -1,13 +1,13 @@
-use crate::{Float, Repr, Spec};
+use crate::{Fixed, Float, Spec};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Serialize, Deserialize, Ord, PartialOrd)]
-pub struct Volt(Repr);
+pub struct Volt(Fixed);
 impl Spec for Volt {
-    fn to_repr(self) -> Repr {
+    fn to_fixed(self) -> Fixed {
         self.0
     }
-    fn from_repr(repr: Repr) -> Self {
+    fn from_fixed(repr: Fixed) -> Self {
         Self(repr)
     }
 
@@ -17,12 +17,12 @@ impl Spec for Volt {
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Serialize, Deserialize, Ord, PartialOrd)]
-pub struct Amp(Repr);
+pub struct Amp(Fixed);
 impl Spec for Amp {
-    fn to_repr(self) -> Repr {
+    fn to_fixed(self) -> Fixed {
         self.0
     }
-    fn from_repr(repr: Repr) -> Self {
+    fn from_fixed(repr: Fixed) -> Self {
         Self(repr)
     }
     const SCALE: Float = 10.0;
@@ -31,12 +31,12 @@ impl Spec for Amp {
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Serialize, Deserialize, Ord, PartialOrd)]
-pub struct Watt(Repr);
+pub struct Watt(Fixed);
 impl Spec for Watt {
-    fn to_repr(self) -> Repr {
+    fn to_fixed(self) -> Fixed {
         self.0
     }
-    fn from_repr(repr: Repr) -> Self {
+    fn from_fixed(repr: Fixed) -> Self {
         Self(repr)
     }
     const SCALE: Float = 100.0;
@@ -45,12 +45,12 @@ impl Spec for Watt {
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Serialize, Deserialize, Ord, PartialOrd)]
-pub struct KiloWatt(Repr);
+pub struct KiloWatt(Fixed);
 impl Spec for KiloWatt {
-    fn to_repr(self) -> Repr {
+    fn to_fixed(self) -> Fixed {
         self.0
     }
-    fn from_repr(repr: Repr) -> Self {
+    fn from_fixed(repr: Fixed) -> Self {
         Self(repr)
     }
     const SCALE: Float = 10.0;
@@ -59,12 +59,12 @@ impl Spec for KiloWatt {
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Serialize, Deserialize, Ord, PartialOrd)]
-pub struct KiloWattHour(Repr);
+pub struct KiloWattHour(Fixed);
 impl Spec for KiloWattHour {
-    fn to_repr(self) -> Repr {
+    fn to_fixed(self) -> Fixed {
         self.0
     }
-    fn from_repr(repr: Repr) -> Self {
+    fn from_fixed(repr: Fixed) -> Self {
         Self(repr)
     }
     const SCALE: Float = 100.0;
@@ -73,12 +73,12 @@ impl Spec for KiloWattHour {
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Serialize, Deserialize, Ord, PartialOrd)]
-pub struct CentiOhm(Repr);
+pub struct CentiOhm(Fixed);
 impl Spec for CentiOhm {
-    fn to_repr(self) -> Repr {
+    fn to_fixed(self) -> Fixed {
         self.0
     }
-    fn from_repr(repr: Repr) -> Self {
+    fn from_fixed(repr: Fixed) -> Self {
         Self(repr)
     }
     const SCALE: Float = 1000.0;
