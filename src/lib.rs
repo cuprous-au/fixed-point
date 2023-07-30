@@ -349,6 +349,20 @@ mod tests {
     }
 
     #[test]
+    fn fixing() {
+        assert_eq!(LowVoltage::new(1.705).fix3(), 1705);
+        assert_eq!(LowVoltage::new(1.705).fix2(), 170);
+        assert_eq!(LowVoltage::new(1.705).fix1(), 17);
+        assert_eq!(Energy::new(1.705).fix3(), 1699);
+        // println!("Exact repr of new(1.705) is {:?}", Energy::new(1.705));
+        assert_eq!(Energy::new(1.705).fix2(), 170);
+        assert_eq!(Energy::new(1.705).fix1(), 17);
+        assert_eq!(Current::new(1.705).fix3(), 1700);
+        assert_eq!(Current::new(1.705).fix2(), 170);
+        assert_eq!(Current::new(1.705).fix1(), 17);
+    }
+
+    #[test]
     fn display() {
         let e1: Power = 5.01f32.into();
         assert_eq!(format!("{}", e1), "5.01");
