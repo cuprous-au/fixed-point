@@ -175,14 +175,12 @@ where
                     } else {
                         write!(f, "{sign}{whole}.{:02}", frac)
                     }
+                } else if frac % 100 == 0 {
+                    write!(f, "{sign}{whole}.{}", frac / 100)
+                } else if frac % 10 == 0 {
+                    write!(f, "{sign}{whole}.{:02}", frac / 10)
                 } else {
-                    if frac % 100 == 0 {
-                        write!(f, "{sign}{whole}.{}", frac / 100)
-                    } else if frac % 10 == 0 {
-                        write!(f, "{sign}{whole}.{:02}", frac / 10)
-                    } else {
-                        write!(f, "{sign}{whole}.{:03}", frac)
-                    }
+                    write!(f, "{sign}{whole}.{:03}", frac)
                 }
             } else {
                 write!(f, "{sign}{whole}")
@@ -293,6 +291,8 @@ where
     }
 }
 
+// constants for
+
 // special case energy conversion
 impl From<FixedPoint<unit::Watt>> for FixedPoint<unit::KiloWatt> {
     fn from(value: FixedPoint<unit::Watt>) -> Self {
@@ -321,6 +321,7 @@ mod tests {
     #[test]
     fn cloning_and_equality() {
         let e1: Power = 5.01f32.into();
+        #[allow(clippy::clone_on_copy)]
         let e2 = e1.clone();
         assert_eq!(e1, e2);
     }
