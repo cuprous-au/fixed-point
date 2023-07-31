@@ -72,66 +72,6 @@ where
     pub fn to_float(self) -> Float {
         self.into()
     }
-
-    /// Construct from a integer interpreted at 10x scale.
-    /// Specialised to a zero cost operation for SCALE=10.0
-    pub fn with_fix1(value: Fixed) -> Self {
-        if R::SCALE == 10.0 {
-            Self(R::from_fixed(value))
-        } else {
-            (value as Float * 0.1).into()
-        }
-    }
-
-    /// Construct from a integer interpreted at 100x scale.
-    /// Specialised to a zero cost operation for SCALE=100.0
-    pub fn with_fix2(value: Fixed) -> Self {
-        if R::SCALE == 100.0 {
-            Self(R::from_fixed(value))
-        } else {
-            (value as Float * 0.01).into()
-        }
-    }
-
-    /// Construct from a integer interpreted at 1000x scale.
-    /// Specialised to a zero cost operation for SCALE=1000.0
-    pub fn with_fix3(value: Fixed) -> Self {
-        if R::SCALE == 1000.0 {
-            Self(R::from_fixed(value))
-        } else {
-            (value as Float * 0.001).into()
-        }
-    }
-
-    /// Extract an integer at 10X scale
-    /// Specialised to a zero cost operation for SCALE=10.0
-    pub fn fix1(self) -> Fixed {
-        if R::SCALE == 10.0 {
-            self.0.to_fixed()
-        } else {
-            (self.to_float() * 10.0) as Fixed
-        }
-    }
-
-    /// Extract an integer at 100X scale
-    /// Specialised to a zero cost operation for SCALE=100.0
-    pub fn fix2(self) -> Fixed {
-        if R::SCALE == 100.0 {
-            self.0.to_fixed()
-        } else {
-            (self.to_float() * 100.0) as Fixed
-        }
-    }
-
-    /// Extract an integer at 1000X scale
-    /// Specialised to a zero cost operation for SCALE=1000.0
-    pub fn fix3(self) -> Fixed {
-        if R::SCALE == 1000.0 {
-            self.0.to_fixed()
-        } else {
-            (self.to_float() * 1000.0) as Fixed
-        }
-    }
 }
 
 impl<R> fmt::Debug for FixedPoint<R>
@@ -291,7 +231,90 @@ where
     }
 }
 
-// constants for
+// constants and const constructors for the representations defined in unit
+impl FixedPoint<unit::Amp> {
+    pub const ZERO: Self = Self::with_fix1(0);
+
+    /// Construct from a integer interpreted at 10x scale.
+    pub const fn with_fix1(value: Fixed) -> Self {
+        Self(unit::Amp(value))
+    }
+
+    /// Extract an integer at 10x scale
+    pub const fn fix1(self) -> Fixed {
+        self.0 .0
+    }
+}
+
+impl FixedPoint<unit::Volt> {
+    pub const ZERO: Self = Self::with_fix1(0);
+
+    /// Construct from a integer interpreted at 10x scale.
+    pub const fn with_fix1(value: Fixed) -> Self {
+        Self(unit::Volt(value))
+    }
+
+    /// Extract an integer at 10x scale
+    pub const fn fix1(self) -> Fixed {
+        self.0 .0
+    }
+}
+
+impl FixedPoint<unit::PreciseVolt> {
+    pub const ZERO: Self = Self::with_fix3(0);
+
+    /// Construct from a integer interpreted at 1000x scale.
+    pub const fn with_fix3(value: Fixed) -> Self {
+        Self(unit::PreciseVolt(value))
+    }
+
+    /// Extract an integer at 1000x scale
+    pub const fn fix3(self) -> Fixed {
+        self.0 .0
+    }
+}
+
+impl FixedPoint<unit::Watt> {
+    pub const ZERO: Self = Self::with_fix2(0);
+
+    /// Construct from a integer interpreted at 100x scale.
+    pub const fn with_fix2(value: Fixed) -> Self {
+        Self(unit::Watt(value))
+    }
+
+    /// Extract an integer at 100x scale
+    pub const fn fix2(self) -> Fixed {
+        self.0 .0
+    }
+}
+
+impl FixedPoint<unit::KiloWatt> {
+    pub const ZERO: Self = Self::with_fix1(0);
+
+    /// Construct from a integer interpreted at 10x scale.
+    pub const fn with_fix1(value: Fixed) -> Self {
+        Self(unit::KiloWatt(value))
+    }
+
+    /// Extract an integer at 10x scale
+    pub const fn fix1(self) -> Fixed {
+        self.0 .0
+    }
+}
+
+impl FixedPoint<unit::KiloWattHour> {
+    pub const ZERO: Self = Self::with_fix2(0);
+
+    /// Construct from a integer interpreted at 100x scale.
+    pub const fn with_fix2(value: Fixed) -> Self {
+        Self(unit::KiloWattHour(value))
+    }
+
+    /// Extract an integer at 100x scale
+    pub const fn fix2(self) -> Fixed {
+        self.0 .0
+    }
+}
 
 // special case energy conversion
 impl From<FixedPoint<unit::Watt>> for FixedPoint<unit::KiloWatt> {
@@ -341,25 +364,14 @@ mod tests {
 
     #[test]
     fn construction() {
-        // println!("Exact repr of new(1.705) is {:?}", LowVoltage::new(1.705));
         assert_eq!(LowVoltage::new(1.705).to_float(), 1.705);
-        // println!("Exact repr of new1(1705) is {:?}", LowVoltage::new1(1705));
-        assert_eq!(LowVoltage::with_fix1(1705).to_float(), 170.50002);
-        assert_eq!(LowVoltage::with_fix2(1705).to_float(), 17.050001);
         assert_eq!(LowVoltage::with_fix3(1705).to_float(), 1.705);
     }
 
     #[test]
     fn fixing() {
         assert_eq!(LowVoltage::new(1.705).fix3(), 1705);
-        assert_eq!(LowVoltage::new(1.705).fix2(), 170);
-        assert_eq!(LowVoltage::new(1.705).fix1(), 17);
-        assert_eq!(Energy::new(1.705).fix3(), 1699);
-        // println!("Exact repr of new(1.705) is {:?}", Energy::new(1.705));
         assert_eq!(Energy::new(1.705).fix2(), 170);
-        assert_eq!(Energy::new(1.705).fix1(), 17);
-        assert_eq!(Current::new(1.705).fix3(), 1700);
-        assert_eq!(Current::new(1.705).fix2(), 170);
         assert_eq!(Current::new(1.705).fix1(), 17);
     }
 

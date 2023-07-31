@@ -2,7 +2,7 @@ use crate::{Fixed, Float, Spec};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Serialize, Deserialize, Ord, PartialOrd)]
-pub struct Volt(Fixed);
+pub struct Volt(pub Fixed);
 impl Spec for Volt {
     fn to_fixed(self) -> Fixed {
         self.0
@@ -16,7 +16,7 @@ impl Spec for Volt {
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Serialize, Deserialize, Ord, PartialOrd)]
-pub struct PreciseVolt(Fixed);
+pub struct PreciseVolt(pub Fixed);
 impl Spec for PreciseVolt {
     fn to_fixed(self) -> Fixed {
         self.0
@@ -30,7 +30,7 @@ impl Spec for PreciseVolt {
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Serialize, Deserialize, Ord, PartialOrd)]
-pub struct Amp(Fixed);
+pub struct Amp(pub Fixed);
 impl Spec for Amp {
     fn to_fixed(self) -> Fixed {
         self.0
@@ -43,7 +43,7 @@ impl Spec for Amp {
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Serialize, Deserialize, Ord, PartialOrd)]
-pub struct Watt(Fixed);
+pub struct Watt(pub Fixed);
 impl Spec for Watt {
     fn to_fixed(self) -> Fixed {
         self.0
@@ -56,7 +56,7 @@ impl Spec for Watt {
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Serialize, Deserialize, Ord, PartialOrd)]
-pub struct KiloWatt(Fixed);
+pub struct KiloWatt(pub Fixed);
 impl Spec for KiloWatt {
     fn to_fixed(self) -> Fixed {
         self.0
@@ -69,7 +69,7 @@ impl Spec for KiloWatt {
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Serialize, Deserialize, Ord, PartialOrd)]
-pub struct KiloWattHour(Fixed);
+pub struct KiloWattHour(pub Fixed);
 impl Spec for KiloWattHour {
     fn to_fixed(self) -> Fixed {
         self.0
