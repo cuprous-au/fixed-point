@@ -125,6 +125,9 @@ where
             } else {
                 write!(f, "{sign}{whole}")
             }
+        } else if R::SCALE == 1.0 {
+            // scale 1.0 is displayed without conversions
+            write!(f, "{}", self.0.to_fixed())
         } else {
             // Every other scale including non decimal
             write!(f, "{}", self.to_float())
