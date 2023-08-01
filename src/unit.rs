@@ -46,7 +46,7 @@ impl Spec for Amp {
 #[derive(Clone, Copy, Default, Eq, PartialEq, Serialize, Deserialize, Ord, PartialOrd)]
 pub struct Watt(pub Fixed);
 impl Spec for Watt {
-    const SCALE: Float = 100.0;
+    const SCALE: Float = 1.0;
     const SYMBOL: &'static str = "W";
 
     fn to_fixed(self) -> Fixed {

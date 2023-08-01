@@ -278,15 +278,15 @@ impl FixedPoint<unit::PreciseVolt> {
 }
 
 impl FixedPoint<unit::Watt> {
-    pub const ZERO: Self = Self::with_fix2(0);
+    pub const ZERO: Self = Self::with_fix0(0);
 
     /// Construct from a integer interpreted at 100x scale.
-    pub const fn with_fix2(value: Fixed) -> Self {
+    pub const fn with_fix0(value: Fixed) -> Self {
         Self(unit::Watt(value))
     }
 
     /// Extract an integer at 100x scale
-    pub const fn fix2(self) -> Fixed {
+    pub const fn fix0(self) -> Fixed {
         self.0 .0
     }
 }
@@ -346,7 +346,7 @@ mod tests {
 
     #[test]
     fn cloning_and_equality() {
-        let e1: Power = 5.01f32.into();
+        let e1: Energy = 5.01f32.into();
         #[allow(clippy::clone_on_copy)]
         let e2 = e1.clone();
         assert_eq!(e1, e2);
@@ -354,14 +354,14 @@ mod tests {
 
     #[test]
     fn ordering() {
-        let e1: Power = 5.01f32.into();
-        let e2: Power = 5.11f32.into();
+        let e1: Energy = 5.01f32.into();
+        let e2: Energy = 5.11f32.into();
         assert!(e2 > e1);
     }
 
     #[test]
     fn serialization() {
-        let e1: Power = 5.01f32.into();
+        let e1: Energy = 5.01f32.into();
         assert_eq!(serde_json::to_string(&e1).unwrap(), "501");
     }
 
@@ -380,10 +380,10 @@ mod tests {
 
     #[test]
     fn display() {
-        let e1: Power = 5.01f32.into();
+        let e1: Energy = 5.01f32.into();
         assert_eq!(format!("{}", e1), "5.01");
-        assert_eq!(format!("{:?}", e1), "501/100 W");
-        assert_eq!(format!("{}", Power::default() - e1), "-5.01");
+        assert_eq!(format!("{:?}", e1), "501/100 kWh");
+        assert_eq!(format!("{}", Energy::ZERO - e1), "-5.01");
     }
 
     #[test]
@@ -434,31 +434,30 @@ mod tests {
         assert_eq!(Energy::with_fix2(310).to_string(), "3.1");
         assert_eq!(Energy::with_fix2(325).to_string(), "3.25");
         assert_eq!(Energy::with_fix2(300).to_string(), "3");
+        assert_eq!(Energy::with_fix2(5).to_string(), "0.05");
     }
 
     #[test]
     fn test_display_power() {
-        assert_eq!(Power::with_fix2(5).to_string(), "0.05");
-        assert_eq!(Power::with_fix2(305).to_string(), "3.05");
-        assert_eq!(Power::with_fix2(325).to_string(), "3.25");
-        assert_eq!(Power::with_fix2(320).to_string(), "3.2");
-        assert_eq!(Power::with_fix2(300).to_string(), "3");
-        assert_eq!(Power::with_fix2(310020).kwh().to_string(), "3.1");
-        assert_eq!(Power::with_fix2(1).kwh().to_string(), "0");
-        assert_eq!(Power::with_fix2(11400).kwh().to_string(), "0.1");
-        assert_eq!(Power::with_fix2(1400).kwh().to_string(), "0");
+        assert_eq!(Power::with_fix0(5).to_string(), "5");
+        assert_eq!(Power::with_fix0(305).to_string(), "305");
+        assert_eq!(Power::with_fix0(30).to_string(), "30");
+        assert_eq!(Power::with_fix0(3102).kwh().to_string(), "3.1");
+        assert_eq!(Power::with_fix0(1).kwh().to_string(), "0");
+        assert_eq!(Power::with_fix0(114).kwh().to_string(), "0.1");
+        assert_eq!(Power::with_fix0(14).kwh().to_string(), "0");
     }
 
     #[test]
-    fn test_display_negative_power() {
-        assert_eq!(Power::with_fix2(-5).to_string(), "-0.05");
-        assert_eq!(Power::with_fix2(-305).to_string(), "-3.05");
-        assert_eq!(Power::with_fix2(-325).to_string(), "-3.25");
-        assert_eq!(Power::with_fix2(-300).to_string(), "-3");
-        assert_eq!(Power::with_fix2(-310020).kwh().to_string(), "-3.1");
-        assert_eq!(Power::with_fix2(-1).kwh().to_string(), "0");
-        assert_eq!(Power::with_fix2(-11400).kwh().to_string(), "-0.1");
-        assert_eq!(Power::with_fix2(-1400).kwh().to_string(), "0");
+    fn test_display_negative_numbers() {
+        assert_eq!(Energy::with_fix2(-5).to_string(), "-0.05");
+        assert_eq!(Energy::with_fix2(-305).to_string(), "-3.05");
+        assert_eq!(Energy::with_fix2(-325).to_string(), "-3.25");
+        assert_eq!(Energy::with_fix2(-300).to_string(), "-3");
+        assert_eq!(Power::with_fix0(-3102).kwh().to_string(), "-3.1");
+        assert_eq!(Power::with_fix0(-1).kwh().to_string(), "0");
+        assert_eq!(Power::with_fix0(-114).kwh().to_string(), "-0.1");
+        assert_eq!(Power::with_fix0(-14).kwh().to_string(), "0");
     }
 
     #[test]
