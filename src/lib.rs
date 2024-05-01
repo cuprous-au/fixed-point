@@ -280,7 +280,7 @@ impl FixedPoint<unit::PreciseVolt> {
 impl FixedPoint<unit::Watt> {
     pub const ZERO: Self = Self::with_fix0(0);
 
-    /// Construct from a integer interpreted at 100x scale.
+    /// Construct from a integer interpreted at 1x scale.
     pub const fn with_fix0(value: Fixed) -> Self {
         Self(unit::Watt(value))
     }
