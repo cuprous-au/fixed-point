@@ -88,7 +88,7 @@ impl Spec for KiloWattHour {
 #[derive(Clone, Copy, Default, Eq, PartialEq, Serialize, Deserialize, Ord, PartialOrd)]
 pub struct Celsius(pub Fixed);
 impl Spec for Celsius {
-    const SCALE: Float = 10.0;
+    const SCALE: Float = 100.0;
     const SYMBOL: &'static str = "C";
 
     fn to_fixed(self) -> Fixed {

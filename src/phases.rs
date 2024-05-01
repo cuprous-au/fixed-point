@@ -31,6 +31,10 @@ where
     pub fn max(self) -> Option<T> {
         max_opt(self.0, max_opt(self.1, self.2))
     }
+
+    pub fn min(self) -> Option<T> {
+        min_opt(self.0, min_opt(self.1, self.2))
+    }
 }
 
 impl<T> Add<PhasesOpt<T>> for PhasesOpt<T>
@@ -66,6 +70,18 @@ where
 {
     match (lhs, rhs) {
         (Some(a), Some(b)) => Some(a.max(b)),
+        (Some(a), None) => Some(a),
+        (None, Some(b)) => Some(b),
+        (None, None) => None,
+    }
+}
+
+fn min_opt<T>(lhs: Option<T>, rhs: Option<T>) -> Option<T>
+where
+    T: Ord,
+{
+    match (lhs, rhs) {
+        (Some(a), Some(b)) => Some(a.min(b)),
         (Some(a), None) => Some(a),
         (None, Some(b)) => Some(b),
         (None, None) => None,
