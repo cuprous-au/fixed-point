@@ -335,15 +335,15 @@ impl FixedPoint<unit::Watt> {
 }
 
 impl FixedPoint<unit::Celsius> {
-    pub const ZERO: Self = Self::with_fix1(0);
+    pub const ZERO: Self = Self::with_fix2(0);
 
     /// Construct from a integer interpreted at 10x scale.
-    pub const fn with_fix1(value: Fixed) -> Self {
+    pub const fn with_fix2(value: Fixed) -> Self {
         Self(unit::Celsius(value))
     }
 
     /// Extract an integer at 10x scale
-    pub const fn fix1(self) -> Fixed {
+    pub const fn fix2(self) -> Fixed {
         self.0 .0
     }
 }
