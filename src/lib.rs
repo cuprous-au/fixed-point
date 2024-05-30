@@ -2,7 +2,7 @@
 
 use core::{
     fmt,
-    ops::{Add, Div, Mul, Sub},
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
     str::FromStr,
 };
 use serde::{Deserialize, Serialize};
@@ -184,6 +184,15 @@ where
     }
 }
 
+impl<R> AddAssign<FixedPoint<R>> for FixedPoint<R>
+where
+    R: Spec,
+{
+    fn add_assign(&mut self, rhs: FixedPoint<R>) {
+        *self = *self + rhs;
+    }
+}
+
 impl<R> Sub<FixedPoint<R>> for FixedPoint<R>
 where
     R: Spec,
@@ -197,6 +206,15 @@ where
     }
 }
 
+impl<R> SubAssign<FixedPoint<R>> for FixedPoint<R>
+where
+    R: Spec,
+{
+    fn sub_assign(&mut self, rhs: FixedPoint<R>) {
+        *self = *self - rhs;
+    }
+}
+
 impl<R> Mul<Float> for FixedPoint<R>
 where
     R: Spec,
@@ -206,6 +224,15 @@ where
     fn mul(self, rhs: Float) -> Self {
         let lhs: Float = self.into();
         (lhs * rhs).into()
+    }
+}
+
+impl<R> MulAssign<Float> for FixedPoint<R>
+where
+    R: Spec,
+{
+    fn mul_assign(&mut self, rhs: Float) {
+        *self = *self * rhs;
     }
 }
 
@@ -231,6 +258,15 @@ where
         let lhs: Float = self.into();
         let rhs: Float = rhs.into();
         lhs / rhs
+    }
+}
+
+impl<R> DivAssign<Float> for FixedPoint<R>
+where
+    R: Spec,
+{
+    fn div_assign(&mut self, rhs: Float) {
+        *self = *self / rhs;
     }
 }
 
