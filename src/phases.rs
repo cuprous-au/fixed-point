@@ -163,20 +163,14 @@ fn mul_opt<T>(lhs: Option<T>, rhs: Float) -> Option<T>
 where
     T: Mul<T, Output = T> + From<Float> + Into<Float>,
 {
-    match (lhs, rhs) {
-        (Some(a), b) => Some((a.into() as Float * b).into()),
-        (None, _) => None,
-    }
+    lhs.map(|lhs| (lhs.into() as Float * rhs).into())
 }
 
 fn div_opt<T>(lhs: Option<T>, rhs: Float) -> Option<T>
 where
     T: Div<Float, Output = T> + From<Float> + Into<Float>,
 {
-    match (lhs, rhs) {
-        (Some(a), b) => Some((a.into() as Float / b).into()),
-        (None, _) => None,
-    }
+    lhs.map(|lhs| (lhs.into() as Float / rhs).into())
 }
 
 fn max_opt<T>(lhs: Option<T>, rhs: Option<T>) -> Option<T>
