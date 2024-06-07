@@ -89,7 +89,7 @@ where
 
 impl<T> Mul<Float> for PhasesOpt<T>
 where
-    T: Mul<T, Output = T> + From<Float> + Into<Float>,
+    T: Mul<Float, Output = T>,
 {
     type Output = Self;
 
@@ -104,7 +104,7 @@ where
 
 impl<T> MulAssign<Float> for PhasesOpt<T>
 where
-    T: Mul<T, Output = T> + From<Float> + Into<Float> + Copy,
+    T: Mul<Float, Output = T> + Copy,
 {
     fn mul_assign(&mut self, rhs: Float) {
         *self = *self * rhs;
@@ -113,7 +113,7 @@ where
 
 impl<T> Div<Float> for PhasesOpt<T>
 where
-    T: Mul<T, Output = T> + Div<Float, Output = T> + From<Float> + Into<Float>,
+    T: Mul<Float, Output = T> + Div<Float, Output = T>,
 {
     type Output = Self;
 
@@ -129,7 +129,7 @@ where
 
 impl<T> DivAssign<Float> for PhasesOpt<T>
 where
-    T: Mul<T, Output = T> + Div<Float, Output = T> + From<Float> + Into<Float> + Copy,
+    T: Mul<Float, Output = T> + Div<Float, Output = T> + Copy,
 {
     fn div_assign(&mut self, rhs: Float) {
         *self = *self / rhs;
@@ -162,9 +162,9 @@ where
 
 fn mul_opt<T>(lhs: Option<T>, rhs: Float) -> Option<T>
 where
-    T: Mul<T, Output = T> + From<Float> + Into<Float>,
+    T: Mul<Float, Output = T>,
 {
-    lhs.map(|lhs| (lhs.into() as Float * rhs).into())
+    lhs.map(|lhs| lhs * rhs)
 }
 
 fn max_opt<T>(lhs: Option<T>, rhs: Option<T>) -> Option<T>
