@@ -1,4 +1,4 @@
-use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 use serde::{Deserialize, Serialize};
 
@@ -65,7 +65,7 @@ where
 
 impl<T> Sub<PhasesOpt<T>> for PhasesOpt<T>
 where
-    T: Sub<T, Output = T>,
+    T: Neg<Output = T> + Sub<T, Output = T>,
 {
     type Output = Self;
 
@@ -80,7 +80,7 @@ where
 
 impl<T> SubAssign<PhasesOpt<T>> for PhasesOpt<T>
 where
-    T: Sub<T, Output = T> + Copy,
+    T: Neg<Output = T> + Sub<T, Output = T> + Copy,
 {
     fn sub_assign(&mut self, rhs: PhasesOpt<T>) {
         *self = *self - rhs;
@@ -113,22 +113,23 @@ where
 
 impl<T> Div<Float> for PhasesOpt<T>
 where
-    T: Div<Float, Output = T> + From<Float> + Into<Float>,
+    T: Mul<T, Output = T> + Div<Float, Output = T> + From<Float> + Into<Float>,
 {
     type Output = Self;
 
     fn div(self, rhs: Float) -> Self {
+        let reciprical = 1.0 / rhs;
         Self(
-            div_opt(self.0, rhs),
-            div_opt(self.1, rhs),
-            div_opt(self.2, rhs),
+            mul_opt(self.0, reciprical),
+            mul_opt(self.1, reciprical),
+            mul_opt(self.2, reciprical),
         )
     }
 }
 
 impl<T> DivAssign<Float> for PhasesOpt<T>
 where
-    T: Div<Float, Output = T> + From<Float> + Into<Float> + Copy,
+    T: Mul<T, Output = T> + Div<Float, Output = T> + From<Float> + Into<Float> + Copy,
 {
     fn div_assign(&mut self, rhs: Float) {
         *self = *self / rhs;
@@ -149,12 +150,12 @@ where
 
 fn sub_opt<T>(lhs: Option<T>, rhs: Option<T>) -> Option<T>
 where
-    T: Sub<T, Output = T>,
+    T: Neg<Output = T> + Sub<T, Output = T>,
 {
     match (lhs, rhs) {
         (Some(a), Some(b)) => Some(a - b),
         (Some(a), None) => Some(a),
-        (None, Some(b)) => Some(b),
+        (None, Some(b)) => Some(-b),
         (None, None) => None,
     }
 }
@@ -164,13 +165,6 @@ where
     T: Mul<T, Output = T> + From<Float> + Into<Float>,
 {
     lhs.map(|lhs| (lhs.into() as Float * rhs).into())
-}
-
-fn div_opt<T>(lhs: Option<T>, rhs: Float) -> Option<T>
-where
-    T: Div<Float, Output = T> + From<Float> + Into<Float>,
-{
-    lhs.map(|lhs| (lhs.into() as Float / rhs).into())
 }
 
 fn max_opt<T>(lhs: Option<T>, rhs: Option<T>) -> Option<T>
