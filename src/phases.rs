@@ -113,7 +113,7 @@ where
 
 impl<T> Div<Float> for PhasesOpt<T>
 where
-    T: Mul<Float, Output = T> + Div<Float, Output = T>,
+    T: Mul<Float, Output = T>,
 {
     type Output = Self;
 
@@ -129,7 +129,7 @@ where
 
 impl<T> DivAssign<Float> for PhasesOpt<T>
 where
-    T: Mul<Float, Output = T> + Div<Float, Output = T> + Copy,
+    T: Mul<Float, Output = T> + Copy,
 {
     fn div_assign(&mut self, rhs: Float) {
         *self = *self / rhs;
